@@ -1,0 +1,5 @@
+#!/bin/bash
+# Raccourci pour démarrer avec Traefik
+cd "$(dirname "$0")"
+./local/start-traefik.sh
+

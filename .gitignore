@@ -1,0 +1,293 @@
+# =============================================================================
+# Evolution API - .gitignore optimisé
+# =============================================================================
+
+# Dossier de tests (exclu comme demandé)
+test-/
+/test-/*
+
+# =============================================================================
+# Node.js & npm/yarn
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# =============================================================================
+# Environment & Configuration
+# =============================================================================
+# Variables d'environnement sensibles
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Fichiers de configuration sensibles
+config.json
+config.local.json
+secrets.json
+credentials.json
+
+# Clés API et certificats
+*.key
+*.pem
+*.p12
+*.pfx
+api-keys.txt
+tokens.txt
+
+# =============================================================================
+# Docker & Containers
+# =============================================================================
+# Override docker-compose files (gardez les principaux)
+docker-compose.override.yml
+docker-compose.local.override.yml
+
+# Docker volumes et données persistantes
+docker-data/
+volumes/
+data/
+postgres-data/
+redis-data/
+mongodb-data/
+
+# =============================================================================
+# Logs & Monitoring
+# =============================================================================
+logs/
+*.log
+*.log.*
+log-*.txt
+error.log
+access.log
+combined.log
+debug.log
+
+# PM2 logs
+pm2-logs/
+.pm2/
+
+# =============================================================================
+# Base de données & Stockage
+# =============================================================================
+# Fichiers de base de données locaux
+*.db
+*.sqlite
+*.sqlite3
+dump.sql
+backup.sql
+*.dump
+
+# Redis dump
+dump.rdb
+
+# =============================================================================
+# Fichiers temporaires & Cache
+# =============================================================================
+# Cache et fichiers temporaires
+.cache/
+.tmp/
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Thumbnails et previews
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =============================================================================
+# IDE & Éditeurs
+# =============================================================================
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# Système d'exploitation
+# =============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Fichiers de sauvegarde & Archives
+# =============================================================================
+# Sauvegardes
+*.bak
+*.backup
+*.old
+backup/
+backups/
+*.orig
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# =============================================================================
+# Fichiers de développement & Tests
+# =============================================================================
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output
+
+# Jest
+jest-coverage/
+
+# Tests temporaires
+test-results/
+test-reports/
+*.test.local.*
+
+# =============================================================================
+# Uploads & Médias
+# =============================================================================
+# Fichiers uploadés (selon votre config)
+uploads/
+media/
+attachments/
+files/
+images/user-*
+avatars/
+temp-uploads/
+
+# =============================================================================
+# Certificats SSL & Sécurité
+# =============================================================================
+# Certificats SSL/TLS
+*.crt
+*.cer
+*.ca-bundle
+*.p7b
+*.p7s
+*.spc
+ssl/
+certs/
+certificates/
+
+# =============================================================================
+# Monitoring & Analytics
+# =============================================================================
+# Metrics et stats
+metrics/
+stats/
+analytics/
+monitoring-data/
+
+# =============================================================================
+# Déploiement & Production
+# =============================================================================
+# Build artifacts
+build/
+dist/
+out/
+
+# Fichiers de déploiement sensibles
+deploy-secrets/
+production-keys/
+.secrets/
+
+# =============================================================================
+# Divers
+# =============================================================================
+# Fichiers lock temporaires
+*.lock
+.lock
+
+# PID files
+*.pid
+
+# Sockets
+*.sock
+
+# Core dumps
+core.*
+
+# Fichiers de session
+sessions/
+.sessions/

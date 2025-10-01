@@ -1,0 +1,86 @@
+version: '3.9'
+
+services:
+  # API Evolution - Test avec 1 instance seulement (évite conflit de port)
+  evolution-api:
+    image: evoapicloud/evolution-api:v2.3.0
+    restart: always
+    ports:
+      - "8081:8080"  # Port 8081 pour éviter conflit avec Traefik
+    environment:
+      # Configuration de base
+      SERVER_TYPE: http
+      SERVER_PORT: 8080
+      SERVER_URL: http://localhost:8081
+      
+      # Base de données Neon (Externe)
+      DATABASE_ENABLED: true
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: ${DATABASE_CONNECTION_URI}
+      DATABASE_CONNECTION_CLIENT_NAME: evolution_test_local
+      DATABASE_SAVE_DATA_INSTANCE: true
+      DATABASE_SAVE_DATA_NEW_MESSAGE: false
+      DATABASE_SAVE_MESSAGE_UPDATE: true
+      DATABASE_SAVE_DATA_CONTACTS: true
+      DATABASE_SAVE_DATA_CHATS: false
+      DATABASE_SAVE_DATA_LABELS: true
+      DATABASE_SAVE_DATA_HISTORIC: true
+      
+      # Redis Cloud (Externe)
+      CACHE_REDIS_ENABLED: true
+      CACHE_REDIS_URI: ${CACHE_REDIS_URI}
+      CACHE_REDIS_PREFIX_KEY: evolution_test_wazzap_ai
+      CACHE_REDIS_SAVE_INSTANCES: true
+      CACHE_LOCAL_ENABLED: false
+      
+      # Authentification
+      AUTHENTICATION_API_KEY: ${AUTHENTICATION_API_KEY}
+      AUTHENTICATION_JWT_EXPIRES_IN: 0
+      AUTHENTICATION_JWT_SECRET: ${JWT_SECRET}
+      
+      # Configuration des instances
+      DEL_INSTANCE: 8
+      CLEAN_STORE_CLEANING_INTERVAL: 7200
+      CLEAN_STORE_MESSAGES: true
+      CLEAN_STORE_CONTACTS: true
+      CLEAN_STORE_CHATS: true
+      
+      # Configuration WebHook
+      WEBHOOK_GLOBAL_URL: ${WEBHOOK_GLOBAL_URL}
+      WEBHOOK_GLOBAL_ENABLED: ${WEBHOOK_GLOBAL_ENABLED}
+      WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: ${WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS}
+      WEBHOOK_GLOBAL_WEBHOOK_BASE64: ${WEBHOOK_GLOBAL_WEBHOOK_BASE64}
+      WEBHOOK_GLOBAL_EVENTS: ${WEBHOOK_GLOBAL_EVENTS}
+      
+      # Configuration des logs
+      LOG_LEVEL: INFO
+      LOG_COLOR: true
+      LOG_BAILEYS: error
+      
+      # Configuration CORS
+      CORS_ORIGIN: "*"
+      CORS_METHODS: "POST,GET,PUT,DELETE"
+      CORS_CREDENTIALS: true
+      
+      # Configuration S3 (désactivé)
+      S3_ENABLED: false
+      
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks:
+      - evolution_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Pas de replicas en mode Docker Compose standard
+
+networks:
+  evolution_network:
+    driver: bridge
+
+volumes:
+  evolution_instances:
+    driver: local

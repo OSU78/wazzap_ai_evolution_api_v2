@@ -1,0 +1,200 @@
+version: '3.9'
+
+services:
+  # Traefik - Load Balancer avec Dashboard
+  traefik:
+    image: traefik:2.11.2
+    container_name: traefik_local
+    restart: always
+    command:
+      # Configuration générale
+      - "--api.dashboard=true"
+      - "--api.insecure=true"  # Pour le développement local
+      - "--api.debug=true"
+      
+      # Configuration des providers Docker
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=evolution_network"
+      
+      # Configuration des entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      
+      # Configuration des logs
+      - "--log.level=INFO"
+      - "--log.format=common"
+      
+      # Configuration des logs d'accès
+      - "--accesslog=true"
+      - "--accesslog.format=common"
+      
+      # Configuration des métriques
+      - "--metrics.prometheus=true"
+      - "--entrypoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      
+    ports:
+      - "80:80"        # HTTP
+      - "443:443"      # HTTPS
+      - "8080:8080"    # Dashboard Traefik
+      - "8082:8082"    # Métriques Prometheus
+      
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      
+    networks:
+      - evolution_network
+      
+    labels:
+      - "traefik.enable=true"
+      # Dashboard accessible sur http://localhost:8080
+      - "traefik.http.routers.dashboard.rule=Host(`localhost`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+
+  # API Evolution - Instance principale avec Traefik
+  evolution-api:
+    image: evoapicloud/evolution-api:v2.3.0
+    container_name: evolution_api
+    restart: always
+    environment:
+      # Configuration de base
+      SERVER_TYPE: http
+      SERVER_PORT: 8080
+      SERVER_URL: ${SERVER_URL:-http://localhost:8080}
+      CONFIG_SESSION_PHONE_VERSION: ${CONFIG_SESSION_PHONE_VERSION:-2.3000.1023204200}
+      CONFIG_SESSION_PHONE_NAME: ${CONFIG_SESSION_PHONE_NAME:-Chrome}
+      CONFIG_SESSION_PHONE_CLIENT: ${CONFIG_SESSION_PHONE_CLIENT:-Wazzap AI}
+      
+      # Forcer les variables importantes (priorité sur le .env du conteneur)
+      AUTHENTICATION_API_KEY: ${AUTHENTICATION_API_KEY:-B6D711FCDE4D4FD5936544120E713C37}
+      AUTHENTICATION_JWT_SECRET: ${JWT_SECRET:-L=0YWt]b2w[WF>#>:&CWOMH2c<;Kn95jH}
+      AUTHENTICATION_JWT_EXPIRES_IN: 0
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: true
+      
+      # Configuration de la base de données Neon PostgreSQL
+      DATABASE_ENABLED: true
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: ${DATABASE_CONNECTION_URI:-postgresql://neondb_owner:npg_cyOdLoBN0Z5T@ep-soft-pine-adcz7qon-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require}
+      DATABASE_CONNECTION_CLIENT_NAME: evolution_local_wazzap_ai
+      DATABASE_SAVE_DATA_INSTANCE: true
+      DATABASE_SAVE_DATA_NEW_MESSAGE: false
+      DATABASE_SAVE_MESSAGE_UPDATE: true
+      DATABASE_SAVE_DATA_CONTACTS: true
+      DATABASE_SAVE_DATA_CHATS: false
+      DATABASE_SAVE_DATA_LABELS: true
+      DATABASE_SAVE_DATA_HISTORIC: true
+      
+      # Configuration Redis Cloud
+      CACHE_REDIS_ENABLED: true
+      CACHE_REDIS_URI: ${CACHE_REDIS_URI:-redis://default:hUQnreFwfxJYV5VD2R6VmpJTu8angsP2@redis-19966.c10.us-east-1-2.ec2.redns.redis-cloud.com:19966/1}
+      CACHE_REDIS_PREFIX_KEY: evolution_local_wazzap_ai
+      CACHE_REDIS_SAVE_INSTANCES: true
+      CACHE_LOCAL_ENABLED: false
+      
+      # Configuration WebHook - Forcer les valeurs Wazzap
+      WEBHOOK_GLOBAL_URL: ${WEBHOOK_GLOBAL_URL:-https://wazzap.ngrok.app/api/webhook/v2/messageHandlers}
+      WEBHOOK_GLOBAL_ENABLED: ${WEBHOOK_GLOBAL_ENABLED:-true}
+      WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: ${WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS:-true}
+      WEBHOOK_GLOBAL_WEBHOOK_BASE64: ${WEBHOOK_GLOBAL_WEBHOOK_BASE64:-true}
+      # Webhook Events (nouvelles variables individuelles)
+      WEBHOOK_EVENTS_APPLICATION_STARTUP: ${WEBHOOK_EVENTS_APPLICATION_STARTUP:-false}
+      WEBHOOK_EVENTS_QRCODE_UPDATED: ${WEBHOOK_EVENTS_QRCODE_UPDATED:-true}
+      WEBHOOK_EVENTS_MESSAGES_SET: ${WEBHOOK_EVENTS_MESSAGES_SET:-false}
+      WEBHOOK_EVENTS_MESSAGES_UPSERT: ${WEBHOOK_EVENTS_MESSAGES_UPSERT:-true}
+      WEBHOOK_EVENTS_MESSAGES_UPDATE: ${WEBHOOK_EVENTS_MESSAGES_UPDATE:-false}
+      WEBHOOK_EVENTS_MESSAGES_DELETE: ${WEBHOOK_EVENTS_MESSAGES_DELETE:-false}
+      WEBHOOK_EVENTS_SEND_MESSAGE: ${WEBHOOK_EVENTS_SEND_MESSAGE:-true}
+      WEBHOOK_EVENTS_CONTACTS_SET: ${WEBHOOK_EVENTS_CONTACTS_SET:-false}
+      WEBHOOK_EVENTS_CONTACTS_UPSERT: ${WEBHOOK_EVENTS_CONTACTS_UPSERT:-false}
+      WEBHOOK_EVENTS_CONTACTS_UPDATE: ${WEBHOOK_EVENTS_CONTACTS_UPDATE:-false}
+      WEBHOOK_EVENTS_PRESENCE_UPDATE: ${WEBHOOK_EVENTS_PRESENCE_UPDATE:-false}
+      WEBHOOK_EVENTS_CHATS_SET: ${WEBHOOK_EVENTS_CHATS_SET:-false}
+      WEBHOOK_EVENTS_CHATS_UPSERT: ${WEBHOOK_EVENTS_CHATS_UPSERT:-false}
+      WEBHOOK_EVENTS_CHATS_UPDATE: ${WEBHOOK_EVENTS_CHATS_UPDATE:-false}
+      WEBHOOK_EVENTS_CHATS_DELETE: ${WEBHOOK_EVENTS_CHATS_DELETE:-false}
+      WEBHOOK_EVENTS_GROUPS_UPSERT: ${WEBHOOK_EVENTS_GROUPS_UPSERT:-false}
+      WEBHOOK_EVENTS_GROUPS_UPDATE: ${WEBHOOK_EVENTS_GROUPS_UPDATE:-false}
+      WEBHOOK_EVENTS_GROUP_PARTICIPANTS_UPDATE: ${WEBHOOK_EVENTS_GROUP_PARTICIPANTS_UPDATE:-false}
+      WEBHOOK_EVENTS_CONNECTION_UPDATE: ${WEBHOOK_EVENTS_CONNECTION_UPDATE:-true}
+      WEBHOOK_EVENTS_LABELS_EDIT: ${WEBHOOK_EVENTS_LABELS_EDIT:-false}
+      WEBHOOK_EVENTS_LABELS_ASSOCIATION: ${WEBHOOK_EVENTS_LABELS_ASSOCIATION:-false}
+      WEBHOOK_EVENTS_CALL: ${WEBHOOK_EVENTS_CALL:-false}
+      WEBHOOK_EVENTS_NEW_JWT_TOKEN: ${WEBHOOK_EVENTS_NEW_JWT_TOKEN:-false}
+      WEBHOOK_EVENTS_TYPEBOT_START: ${WEBHOOK_EVENTS_TYPEBOT_START:-false}
+      WEBHOOK_EVENTS_TYPEBOT_CHANGE_STATUS: ${WEBHOOK_EVENTS_TYPEBOT_CHANGE_STATUS:-false}
+      WEBHOOK_EVENTS_CHAMA_AI_ACTION: ${WEBHOOK_EVENTS_CHAMA_AI_ACTION:-false}
+      WEBHOOK_EVENTS_ERRORS: ${WEBHOOK_EVENTS_ERRORS:-false}
+      WEBHOOK_EVENTS_ERRORS_WEBHOOK: ${WEBHOOK_EVENTS_ERRORS_WEBHOOK:-false}
+      
+      # Configuration des logs
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_COLOR: true
+      LOG_BAILEYS: error
+      
+      # Configuration spécifique
+      DEL_INSTANCE: 8
+      CLEAN_STORE_CLEANING_INTERVAL: 7200
+      CLEAN_STORE_MESSAGES: true
+      CLEAN_STORE_MESSAGE_UP_TO: false
+      CLEAN_STORE_CONTACTS: true
+      CLEAN_STORE_CHATS: true
+      
+      # Désactiver les services non utilisés
+      RABBITMQ_ENABLED: false
+      WEBSOCKET_ENABLED: false
+      PUSHER_ENABLED: false
+      TYPEBOT_ENABLED: false
+      CHATWOOT_ENABLED: false
+      OPENAI_ENABLED: false
+      DIFY_ENABLED: false
+      N8N_ENABLED: false
+      EVOAI_ENABLED: false
+      S3_ENABLED: false
+      
+      # Configuration QR Code
+      QRCODE_LIMIT: 50
+      QRCODE_COLOR: "#010101FF"
+      
+      # Configuration de performance
+      STORE_MESSAGES: true
+      STORE_MESSAGE_UP: false
+      STORE_CONTACTS: true
+      STORE_CHATS: true
+      
+      
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks:
+      - evolution_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"] 
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      # API accessible sur http://evolution.localhost
+      - "traefik.http.routers.evolution.rule=Host(`evolution.localhost`)"
+      - "traefik.http.routers.evolution.entrypoints=web"
+      - "traefik.http.services.evolution.loadbalancer.server.port=8080"
+      
+      # API aussi accessible sur http://api.localhost  
+      - "traefik.http.routers.evolution-api.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.evolution-api.entrypoints=web"
+      - "traefik.http.routers.evolution-api.service=evolution"
+    depends_on:
+      - traefik
+
+networks:
+  evolution_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  evolution_instances:
+    driver: local

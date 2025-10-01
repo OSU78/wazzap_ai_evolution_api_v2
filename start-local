@@ -1,0 +1,4 @@
+#!/bin/bash
+# Raccourci pour démarrer en local
+cd "$(dirname "$0")"
+./local/start-local.sh

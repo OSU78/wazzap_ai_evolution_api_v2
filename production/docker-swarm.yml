@@ -1,0 +1,211 @@
+version: "3.7"
+
+services:
+  # Base de données PostgreSQL - Instance unique
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: evolution
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network_public
+    secrets:
+      - postgres_password
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    command: >
+      postgres 
+      -c max_connections=300
+      -c shared_buffers=512MB
+      -c effective_cache_size=1.5GB
+      -c maintenance_work_mem=128MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+
+  # Cache Redis - Instance unique avec réplication
+  redis:
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 60
+      --timeout 300
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    volumes:
+      - redis_data:/data
+    networks:
+      - network_public
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # API Evolution - Multiple instances pour load balancing
+  evolution-api:
+    image: evoapicloud/evolution-api:v2.3.0
+    environment:
+      # Configuration de base
+      SERVER_TYPE: http
+      SERVER_PORT: 8080
+      SERVER_URL: https://your-domain.com
+      
+      # Configuration de la base de données
+      DATABASE_ENABLED: true
+      CONFIG_SESSION_PHONE_VERSION: ${CONFIG_SESSION_PHONE_VERSION:-2.3000.1023204200}
+      CONFIG_SESSION_PHONE_NAME: ${CONFIG_SESSION_PHONE_NAME:-Chrome}
+      -CONFIG_SESSION_PHONE_CLIENT: ${CONFIG_SESSION_PHONE_CLIENT:-Wazzap AI}
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://evolution@postgres:5432/evolution
+      DATABASE_CONNECTION_CLIENT_NAME: evolution_swarm
+      DATABASE_SAVE_DATA_INSTANCE: true
+      DATABASE_SAVE_DATA_NEW_MESSAGE: false
+      DATABASE_SAVE_MESSAGE_UPDATE: true
+      DATABASE_SAVE_DATA_CONTACTS: true
+      DATABASE_SAVE_DATA_CHATS: false
+      DATABASE_SAVE_DATA_LABELS: true
+      DATABASE_SAVE_DATA_HISTORIC: true
+      
+      # Configuration Redis Cache - OBLIGATOIRE pour Swarm
+      CACHE_REDIS_ENABLED: true
+      CACHE_REDIS_URI: redis://redis:6379/1
+      CACHE_REDIS_PREFIX_KEY: evolution_swarm
+      CACHE_REDIS_SAVE_INSTANCES: true
+      CACHE_LOCAL_ENABLED: false
+      
+      # Configuration d'authentification
+      AUTHENTICATION_API_KEY: 429683C4C977415CAAFCCE10F7D57E11
+      AUTHENTICATION_JWT_EXPIRES_IN: 0
+      AUTHENTICATION_JWT_SECRET: "L=0YWt]b2w[WF>#>:&CWOMH2c<;Kn95jH"
+      
+      # Configuration des instances
+      DEL_INSTANCE: 8
+      CLEAN_STORE_CLEANING_INTERVAL: 7200
+      CLEAN_STORE_MESSAGES: true
+      CLEAN_STORE_MESSAGE_UP_TO: false
+      CLEAN_STORE_CONTACTS: true
+      CLEAN_STORE_CHATS: true
+      
+      # Configuration WebHook
+      WEBHOOK_GLOBAL_URL: ""
+      WEBHOOK_GLOBAL_ENABLED: false
+      WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: false
+      
+      # Configuration des logs
+      LOG_LEVEL: ERROR
+      LOG_COLOR: true
+      LOG_BAILEYS: error
+      
+      # Configuration CORS
+      CORS_ORIGIN: "*"
+      CORS_METHODS: "POST,GET,PUT,DELETE"
+      CORS_CREDENTIALS: true
+      
+      # Configuration RabbitMQ (optionnel)
+      RABBITMQ_ENABLED: false
+      
+      # Configuration S3 (recommandé pour Swarm)
+      S3_ENABLED: false
+      
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks:
+      - network_public
+    secrets:
+      - postgres_password
+    deploy:
+      mode: replicated
+      replicas: 3  # 3 instances pour load balancing
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 60s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.8'
+        reservations:
+          memory: 512M
+          cpus: '0.4'
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.evolution_api.rule=Host(`your-domain.com`)
+        - traefik.http.routers.evolution_api.entrypoints=websecure
+        - traefik.http.routers.evolution_api.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.evolution_api.service=evolution_api
+        - traefik.http.services.evolution_api.loadbalancer.server.port=8080
+        - traefik.http.services.evolution_api.loadbalancer.passHostHeader=true
+        - traefik.http.services.evolution_api.loadbalancer.sticky.cookie=true
+        - traefik.http.services.evolution_api.loadbalancer.sticky.cookie.name=evolution_session
+        - traefik.http.services.evolution_api.loadbalancer.healthcheck.path=/
+        - traefik.http.services.evolution_api.loadbalancer.healthcheck.interval=30s
+
+# Configuration des secrets
+secrets:
+  postgres_password:
+    external: true
+    name: evolution_postgres_password
+
+# Configuration des volumes
+volumes:
+  evolution_instances:
+    external: true
+    name: evolution_swarm_instances
+  postgres_data:
+    external: true
+    name: evolution_swarm_postgres
+  redis_data:
+    external: true
+    name: evolution_swarm_redis
+
+# Configuration des réseaux
+networks:
+  network_public:
+    external: true
+    name: network_public

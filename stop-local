@@ -1,0 +1,4 @@
+#!/bin/bash
+# Raccourci pour arrêter les services locaux
+cd "$(dirname "$0")"
+./local/stop-local.sh

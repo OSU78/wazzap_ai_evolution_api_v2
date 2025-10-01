@@ -1,0 +1,131 @@
+version: "3.7"
+
+services:
+  evolution-api:
+    image: evoapicloud/evolution-api:v2.3.0
+    environment:
+      # Configuration de base
+      SERVER_TYPE: http
+      SERVER_PORT: 8080
+      SERVER_URL: https://evolution.wazzap.fr
+      
+      # Base de données Neon (Externe) - Déjà configurée
+      DATABASE_ENABLED: true
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://neondb_owner:npg_cyOdLoBN0Z5T@ep-soft-pine-adcz7qon-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      DATABASE_CONNECTION_CLIENT_NAME: evolution_2servers
+      DATABASE_SAVE_DATA_INSTANCE: true
+      DATABASE_SAVE_DATA_NEW_MESSAGE: false
+      DATABASE_SAVE_MESSAGE_UPDATE: true
+      DATABASE_SAVE_DATA_CONTACTS: true
+      DATABASE_SAVE_DATA_CHATS: false
+      DATABASE_SAVE_DATA_LABELS: true
+      DATABASE_SAVE_DATA_HISTORIC: true
+      
+      # Redis Cloud (Externe) - CRITIQUE pour synchronisation
+      CACHE_REDIS_ENABLED: true
+      CACHE_REDIS_URI: redis://default:hUQnreFwfxJYV5VD2R6VmpJTu8angsP2@redis-19966.c10.us-east-1-2.ec2.redns.redis-cloud.com:19966/1
+      CACHE_REDIS_PREFIX_KEY: evolution_2servers
+      CACHE_REDIS_SAVE_INSTANCES: true
+      CACHE_LOCAL_ENABLED: false
+      
+      # Authentification
+      AUTHENTICATION_API_KEY: B6D711FCDE4D4FD5936544120E713C37
+      AUTHENTICATION_JWT_EXPIRES_IN: 0
+      AUTHENTICATION_JWT_SECRET: "L=0YWt]b2w[WF>#>:&CWOMH2c<;Kn95jH"
+      
+      # Configuration des instances - OPTIMISÉE pour 2 serveurs 16GB
+      DEL_INSTANCE: 8
+      CLEAN_STORE_CLEANING_INTERVAL: 7200   # 2h (standard)
+      CLEAN_STORE_MESSAGES: true
+      CLEAN_STORE_MESSAGE_UP_TO: false
+      CLEAN_STORE_CONTACTS: true
+      CLEAN_STORE_CHATS: true
+      
+      # Configuration WebHook - Wazzap Integration (Déjà configurée)
+      WEBHOOK_GLOBAL_URL: https://wazzap.ngrok.app/api/webhook/v2/messageHandlers
+      WEBHOOK_GLOBAL_ENABLED: true
+      WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: true
+      WEBHOOK_GLOBAL_WEBHOOK_BASE64: false
+      WEBHOOK_GLOBAL_EVENTS: SEND_MESSAGE,QRCODE_UPDATED,REMOVE_INSTANCE,LOGOUT_INSTANCE,CONNECTION_UPDATE,MESSAGES_UPSERT
+      
+      # Configuration des logs - Standard
+      LOG_LEVEL: INFO  # Plus de détails pour le début
+      LOG_COLOR: false
+      LOG_BAILEYS: error
+      
+      # Configuration CORS
+      CORS_ORIGIN: "*"
+      CORS_METHODS: "POST,GET,PUT,DELETE"
+      CORS_CREDENTIALS: true
+      
+      # Configuration RabbitMQ (désactivé)
+      RABBITMQ_ENABLED: false
+      
+      # Configuration S3 (désactivé - utilise stockage local)
+      S3_ENABLED: false
+      
+      # Configuration de performance pour 2 serveurs
+      STORE_MESSAGES: true
+      STORE_MESSAGE_UP: false
+      STORE_CONTACTS: true
+      STORE_CHATS: true
+      
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks:
+      - network_public
+    deploy:
+      mode: replicated
+      replicas: 20  # 10 par serveur × 2 serveurs = 20 instances Evolution API
+      placement:
+        max_replicas_per_node: 10  # Maximum 10 instances par serveur (400 comptes)
+        constraints:
+          - node.role != manager  # Pas sur le manager (optionnel, mais recommandé)
+      update_config:
+        parallelism: 2  # Mettre à jour 2 instances à la fois
+        delay: 15s      # Attendre 15s entre chaque batch
+        failure_action: rollback
+        monitor: 30s
+        max_failure_ratio: 0.2  # Tolérer 20% d'échecs
+      rollback_config:
+        parallelism: 2
+        delay: 15s
+        monitor: 30s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          memory: 1.6G    # 1.6GB par instance (40MB × 40 comptes max)
+          cpus: '0.4'     # 0.4 CPU par instance
+        reservations:
+          memory: 800M    # 800MB réservé par instance
+          cpus: '0.2'     # 0.2 CPU réservé par instance
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.evolution_api.rule=Host(`evolution.wazzap.fr`)
+        - traefik.http.routers.evolution_api.entrypoints=websecure
+        - traefik.http.routers.evolution_api.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.evolution_api.service=evolution_api
+        - traefik.http.services.evolution_api.loadbalancer.server.port=8080
+        - traefik.http.services.evolution_api.loadbalancer.passHostHeader=true
+        - traefik.http.services.evolution_api.loadbalancer.sticky.cookie=true
+        - traefik.http.services.evolution_api.loadbalancer.sticky.cookie.name=evolution_2servers_session
+        - traefik.http.services.evolution_api.loadbalancer.healthcheck.path=/
+        - traefik.http.services.evolution_api.loadbalancer.healthcheck.interval=30s
+        - traefik.http.services.evolution_api.loadbalancer.healthcheck.timeout=10s
+
+# Configuration des volumes
+volumes:
+  evolution_instances:
+    external: true
+    name: evolution_2servers_instances
+
+# Configuration des réseaux
+networks:
+  network_public:
+    external: true
+    name: network_public

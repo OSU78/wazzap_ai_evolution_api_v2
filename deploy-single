@@ -1,0 +1,4 @@
+#!/bin/bash
+# Raccourci pour déployer sur 1 serveur 16GB
+cd "$(dirname "$0")"
+./production/deploy-single-16gb.sh
