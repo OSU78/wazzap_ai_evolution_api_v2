@@ -85,7 +85,7 @@ services:
       # Base de données Neon (Externe)
       DATABASE_ENABLED: true
       DATABASE_PROVIDER: postgresql
-      DATABASE_CONNECTION_URI: ${DATABASE_CONNECTION_URI}
+      DATABASE_CONNECTION_URI: ${DATABASE_CONNECTION_URI:-test}
       DATABASE_CONNECTION_CLIENT_NAME: evolution_single_16gb
       DATABASE_SAVE_DATA_INSTANCE: true
       DATABASE_SAVE_DATA_NEW_MESSAGE: false
