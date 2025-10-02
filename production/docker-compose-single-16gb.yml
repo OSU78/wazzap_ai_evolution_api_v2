@@ -4,37 +4,11 @@
 # Docker Compose charge automatiquement .env s'il existe dans le même répertoire
 
 services:
-  # Service d'initialisation pour créer les volumes et réseaux
-  init-volumes:
-    image: docker:24-cli
-    container_name: init-volumes
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: |
-      sh -c "
-        echo '🔧 Initialisation des volumes et réseaux...'
-        docker volume create evolution_v2_data 2>/dev/null || echo '📦 Volume evolution_v2_data existe déjà'
-        docker network create --driver overlay --attachable network_public 2>/dev/null || echo '🌐 Réseau network_public existe déjà'
-        echo '⏳ Vérification des volumes créés...'
-        docker volume ls | grep evolution_v2_data || (echo '❌ Erreur: Volume non créé' && exit 1)
-        docker network ls | grep network_public || (echo '❌ Erreur: Réseau non créé' && exit 1)
-        echo '✅ Initialisation terminée avec succès'
-        sleep 5
-      "
-    deploy:
-      restart_policy:
-        condition: none
-      placement:
-        constraints:
-          - node.role == manager
-
   # Traefik - Load Balancer et SSL
   traefik:
     image: traefik:2.11.2
     container_name: traefik
     restart: always
-    depends_on:
-      - init-volumes
     command:
       - "--api.dashboard=true"
       - "--providers.docker.swarmMode=true"
@@ -99,8 +73,6 @@ services:
   evolution-api:
     image: evoapicloud/evolution-api:v2.3.0
     restart: always
-    depends_on:
-      - init-volumes
     # Pas d'exposition directe de port - Traefik gère tout
     env_file:
       - .env
@@ -236,13 +208,13 @@ services:
 
 networks:
   network_public:
-    external: true
+    driver: bridge
     name: network_public
 
 volumes:
   evolution_instances:
-    external: true
+    driver: local
     name: evolution_v2_data
   traefik_letsencrypt:
-    external: false
+    driver: local
   
