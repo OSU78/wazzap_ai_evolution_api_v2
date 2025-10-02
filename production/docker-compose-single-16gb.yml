@@ -94,7 +94,7 @@ services:
       - dokploy-network
 
     deploy:
-      replicas: 2
+      replicas: 1
       placement:
         preferences:
           - spread: node.id
