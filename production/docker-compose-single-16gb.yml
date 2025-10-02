@@ -183,12 +183,12 @@ services:
 
     networks:
       - network_public
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8080/"] 
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 60s
     deploy:
       mode: replicated
       replicas: 1
@@ -198,8 +198,8 @@ services:
       
       restart_policy:
         condition: on-failure
-        delay: 5s
-        max_attempts: 3
+        delay: 10s
+        max_attempts: 5
       update_config:
         parallelism: 2  # Mettre à jour 2 instances à la fois
         delay: 30s
