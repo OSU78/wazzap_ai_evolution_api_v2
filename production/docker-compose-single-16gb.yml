@@ -114,6 +114,12 @@ services:
           - node.hostname == evolution-manager
       labels:
         - traefik.enable=true
+        - traefik.enable=true
+        # Router vers le dashboard
+        - traefik.http.routers.traefik.rule=Host(`${DOMAIN_NAME:-traefik.evolution.wazzap.fr}`)
+        - traefik.http.routers.traefik.entrypoints=websecure
+        - traefik.http.routers.traefik.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.traefik.service=api@internal
         - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`)
         - traefik.http.routers.evolution_v2.entrypoints=websecure
         - traefik.http.routers.evolution_v2.tls.certresolver=letsencryptresolver
