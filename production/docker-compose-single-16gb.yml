@@ -1,10 +1,7 @@
 version: "3.9"
 
-# Configuration Docker Compose pour Dokploy
-# IMPORTANT: Les labels Traefik doivent être UNIQUEMENT dans deploy.labels pour Swarm mode
-# Ne JAMAIS ajouter de labels au niveau top-level du service
-
 services:
+  # Evolution API - Instance principale
   evolution-api:
     image: evoapicloud/evolution-api:v2.3.0
     env_file:
@@ -97,59 +94,25 @@ services:
     networks:
       - dokploy-network
 
-    # IMPORTANT: PAS de labels ici! Uniquement dans deploy.labels
-    # Les labels top-level sont pour Docker standalone, pas Swarm
-
     deploy:
       mode: replicated
       replicas: 2
-      
-      # Répartir les replicas sur les différents nodes
       placement:
         preferences:
           - spread: node.id
-        # Optionnel: contraindre à certains nodes
-        # constraints:
-        #   - node.labels.type == evolution-worker
-      
-      # Politique de redémarrage
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      
-      
-      
-      # LABELS TRAEFIK - UNIQUEMENT ICI pour Swarm mode!
       labels:
-        # Activation Traefik
+        # ===== Evolution API - Configuration Traefik =====
         - traefik.enable=true
-        
-        # Configuration du routeur
         - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`)
         - traefik.http.routers.evolution_v2.entrypoints=websecure
         - traefik.http.routers.evolution_v2.tls.certresolver=letsencrypt
         - traefik.http.routers.evolution_v2.service=evolution_v2
-        
-        # Configuration du service (load balancer)
         - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
         - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
-        
-        # Configuration pour éviter les timeouts
+        # Configuration pour éviter les 502 dus aux timeouts keepalive
         - traefik.http.services.evolution_v2.loadbalancer.responseForwarding.flushInterval=100ms
-        
-        # Health check
-        - traefik.http.services.evolution_v2.loadbalancer.healthcheck.path=/
-        - traefik.http.services.evolution_v2.loadbalancer.healthcheck.interval=10s
-        - traefik.http.services.evolution_v2.loadbalancer.healthcheck.timeout=5s
-        
-        # Sticky sessions (optionnel - décommenter si besoin)
-        # - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie=true
-        # - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie.name=evolution_session
-        
-        # Réseau Traefik (important pour Dokploy)
-        
+        # Forcer Traefik à découvrir chaque task individuellement
+        #- traefik.docker.network=dokploy-network
 
 networks:
   dokploy-network:
@@ -160,4 +123,3 @@ volumes:
   evolution_instances:
     external: true
     name: evolution_v2_data
-
