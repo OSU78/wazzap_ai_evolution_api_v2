@@ -7,12 +7,10 @@ services:
     env_file:
       - .env
     environment:
-      # —— Server ——
       SERVER_TYPE: http
       SERVER_PORT: 8080
       SERVER_URL: https://${DOMAIN_NAME}
 
-      # —— Base de données (Neon / externe) ——
       DATABASE_ENABLED: true
       DATABASE_PROVIDER: postgresql
       DATABASE_CONNECTION_URI: ${DATABASE_CONNECTION_URI}
@@ -25,19 +23,16 @@ services:
       DATABASE_SAVE_DATA_LABELS: true
       DATABASE_SAVE_DATA_HISTORIC: true
 
-      # —— Redis (externe) ——
       CACHE_REDIS_ENABLED: true
       CACHE_REDIS_URI: ${CACHE_REDIS_URI}
       CACHE_REDIS_PREFIX_KEY: evolution_single
       CACHE_REDIS_SAVE_INSTANCES: true
       CACHE_LOCAL_ENABLED: false
 
-      # —— Auth ——
       AUTHENTICATION_API_KEY: ${AUTHENTICATION_API_KEY}
       AUTHENTICATION_JWT_EXPIRES_IN: 0
       AUTHENTICATION_JWT_SECRET: ${JWT_SECRET}
 
-      # —— Instances & nettoyage ——
       DEL_INSTANCE: 8
       CLEAN_STORE_CLEANING_INTERVAL: 7200
       CLEAN_STORE_MESSAGES: true
@@ -45,7 +40,6 @@ services:
       CLEAN_STORE_CONTACTS: true
       CLEAN_STORE_CHATS: false
 
-      # —— Webhooks ——
       WEBHOOK_GLOBAL_URL: ${WEBHOOK_GLOBAL_URL:-https://wazzap.ngrok.app/api/webhook/v2/messageHandlers}
       WEBHOOK_GLOBAL_ENABLED: ${WEBHOOK_GLOBAL_ENABLED:-true}
       WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: ${WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS:-true}
@@ -80,20 +74,16 @@ services:
       WEBHOOK_EVENTS_ERRORS: ${WEBHOOK_EVENTS_ERRORS:-false}
       WEBHOOK_EVENTS_ERRORS_WEBHOOK: ${WEBHOOK_EVENTS_ERRORS_WEBHOOK:-false}
 
-      # —— Logs ——
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_COLOR: false
       LOG_BAILEYS: error
 
-      # —— CORS ——
       CORS_ORIGIN: "*"
       CORS_METHODS: "POST,GET,PUT,DELETE"
       CORS_CREDENTIALS: true
 
-      # —— S3 (off) ——
       S3_ENABLED: false
 
-      # —— Perf ——
       STORE_MESSAGES: true
       STORE_CONTACTS: true
       STORE_CHATS: false
@@ -105,36 +95,27 @@ services:
     networks:
       - dokploy-network
 
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          # Gardez votre contrainte si ce nœud existe vraiment, sinon remplacez par "node.role == manager"
-          - node.hostname == evolution-manager
-      labels:
-        - traefik.enable=true
-        - traefik.enable=true
-        # Router vers le dashboard
-        - traefik.http.routers.traefik.rule=Host(`${DOMAIN_NAME:-traefik.evolution.wazzap.fr}`)
-        - traefik.http.routers.traefik.entrypoints=websecure
-        - traefik.http.routers.traefik.tls.certresolver=letsencryptresolver
-        - traefik.http.routers.traefik.service=api@internal
-        - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`)
-        - traefik.http.routers.evolution_v2.entrypoints=websecure
-        - traefik.http.routers.evolution_v2.tls.certresolver=letsencryptresolver
-        - traefik.http.routers.evolution_v2.service=evolution_v2
-        - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
-        - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 5
-      update_config:
-        parallelism: 1
-        delay: 30s
-        failure_action: rollback
-        monitor: 60s
+    # 🔑 Labels Traefik (compose classique => labels ici, pas dans deploy:)
+    labels:
+      - traefik.enable=true
+
+      # Router de l'app sous /manager (avec StripPrefix)
+      - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`) && PathPrefix(`/manager`)
+      - traefik.http.routers.evolution_v2.entrypoints=websecure
+      - traefik.http.routers.evolution_v2.tls.certresolver=letsencryptresolver
+      - traefik.http.routers.evolution_v2.service=evolution_v2
+      - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
+      - traefik.http.middlewares.evo-strip.stripprefix.prefixes=/manager
+      - traefik.http.routers.evolution_v2.middlewares=evo-strip@docker
+
+      # Dashboard Traefik (protège-le en prod avec basic auth)
+      - traefik.http.routers.traefik.rule=Host(`${DASHBOARD_HOST}`)
+      - traefik.http.routers.traefik.entrypoints=websecure
+      - traefik.http.routers.traefik.tls.certresolver=letsencryptresolver
+      - traefik.http.routers.traefik.service=api@internal
+      # Exemple basic-auth (remplace par ton hash htpasswd) :
+      # - traefik.http.routers.traefik.middlewares=traefik-auth@docker
+      # - traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$....hash....
 
 networks:
   dokploy-network:
