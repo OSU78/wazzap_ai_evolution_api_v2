@@ -99,7 +99,9 @@ services:
       replicas: 2
       placement:
         preferences:
-          - spread: node.id
+          #mettre le worker1 en preference
+          - node.id == worker1
+          #- spread: node.id
       labels:
         # ===== Evolution API - Configuration Traefik =====
         - traefik.enable=true
