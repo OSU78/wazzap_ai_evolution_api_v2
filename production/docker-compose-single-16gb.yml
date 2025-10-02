@@ -52,12 +52,10 @@ services:
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-https@docker"
       - "traefik.http.routers.http-catchall.priority=1"
-      # Configuration du dashboard Traefik
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
-      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.traefik-dashboard.service=api@internal"
-      - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.traefik.service=api@internal"
     
     deploy:
       placement:
@@ -178,29 +176,30 @@ services:
       - evolution_instances:/evolution/instances
       - ./.env:/evolution/.env:ro  # Monter votre .env par-dessus celui du conteneur
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`)
-      - traefik.http.routers.evolution_v2.entrypoints=websecure
-      - traefik.http.routers.evolution_v2.tls.certresolver=letsencryptresolver
-      - traefik.http.routers.evolution_v2.service=evolution_v2
-      - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
-      - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
-
+      - "traefik.enable=true"
+      - "traefik.http.routers.evolution.rule=Host(`${DOMAIN_NAME}`)"
+      - "traefik.http.routers.evolution.entrypoints=websecure"
+      - "traefik.http.routers.evolution.tls.certresolver=letsencryptresolver"
+      - "traefik.http.services.evolution.loadbalancer.server.port=8080"
+      - "traefik.http.services.evolution.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.evolution.loadbalancer.sticky.cookie.name=evolution_session"
     networks:
       - network_public
     # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8080/"] 
+    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
     #   interval: 30s
     #   timeout: 10s
-    #   retries: 5
-    #   start_period: 60s
+    #   retries: 3
+    #   start_period: 40s
     deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.hostname == evolution-manager
-      
+      replicas: 3  # 3 instances sur 1 serveur = ~120 comptes WhatsApp
+      resources:
+        limits:
+          memory: 4G    # 4GB par instance (optimisé pour 3 instances sur 16GB)
+          cpus: '2.0'   # 2.0 CPU par instance
+        reservations:
+          memory: 2G    # 2GB réservé par instance
+          cpus: '1.0'   # 1.0 CPU réservé
       restart_policy:
         condition: on-failure
         delay: 10s
@@ -222,4 +221,3 @@ volumes:
     name: evolution_v2_data
   traefik_letsencrypt:
     external: false
-  
