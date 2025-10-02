@@ -12,10 +12,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: |
       sh -c "
-        echo 'Création des volumes et réseaux...'
-        docker volume create evolution_v2_data 2>/dev/null || echo 'Volume evolution_v2_data existe déjà'
-        docker network create --driver overlay --attachable network_public 2>/dev/null || echo 'Réseau network_public existe déjà'
-        echo '✅ - Initialisation terminée'
+        echo '🔧 Initialisation des volumes et réseaux...'
+        docker volume create evolution_v2_data 2>/dev/null || echo '📦 Volume evolution_v2_data existe déjà'
+        docker network create --driver overlay --attachable network_public 2>/dev/null || echo '🌐 Réseau network_public existe déjà'
+        echo '⏳ Vérification des volumes créés...'
+        docker volume ls | grep evolution_v2_data || (echo '❌ Erreur: Volume non créé' && exit 1)
+        docker network ls | grep network_public || (echo '❌ Erreur: Réseau non créé' && exit 1)
+        echo '✅ Initialisation terminée avec succès'
+        sleep 5
       "
     deploy:
       restart_policy:
@@ -29,6 +33,8 @@ services:
     image: traefik:2.11.2
     container_name: traefik
     restart: always
+    depends_on:
+      - init-volumes
     command:
       - "--api.dashboard=true"
       - "--providers.docker.swarmMode=true"
@@ -93,6 +99,8 @@ services:
   evolution-api:
     image: evoapicloud/evolution-api:v2.3.0
     restart: always
+    depends_on:
+      - init-volumes
     # Pas d'exposition directe de port - Traefik gère tout
     env_file:
       - .env
