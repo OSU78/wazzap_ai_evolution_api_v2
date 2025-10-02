@@ -116,9 +116,10 @@ services:
         # ===== (Optionnel) Dashboard Traefik protégé =====
         # Mets DASHBOARD_HOST=traefik.evolution.wazzap.fr dans ton .env
         - traefik.http.routers.traefik.rule=Host(`${DASHBOARD_HOST}`) && PathPrefix(`/dashboard`)
-        - traefik.http.routers.traefik.entrypoints=websecure
-        - traefik.http.routers.traefik.tls.certresolver=letsencrypt
+        - traefik.http.routers.traefik.middlewares=traefik-strip@swarm
+        - traefik.http.middlewares.traefik-strip.stripprefix.prefixes=/dashboard
         - traefik.http.routers.traefik.service=api@internal
+
         # Active une basic-auth (remplace le hash par le tien)
         # - traefik.http.routers.traefik.middlewares=traefik-auth@swarm
         # - traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$....hash....
