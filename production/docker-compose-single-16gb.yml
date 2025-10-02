@@ -4,6 +4,26 @@
 # Docker Compose charge automatiquement .env s'il existe dans le même répertoire
 
 services:
+  # Service d'initialisation pour créer les volumes et réseaux
+  init-volumes:
+    image: docker:24-cli
+    container_name: init-volumes
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: |
+      sh -c "
+        echo 'Création des volumes et réseaux...'
+        docker volume create evolution_v2_data 2>/dev/null || echo 'Volume evolution_v2_data existe déjà'
+        docker network create --driver overlay --attachable network_public 2>/dev/null || echo 'Réseau network_public existe déjà'
+        echo '✅ - Initialisation terminée'
+      "
+    deploy:
+      restart_policy:
+        condition: none
+      placement:
+        constraints:
+          - node.role == manager
+
   # Traefik - Load Balancer et SSL
   traefik:
     image: traefik:2.11.2
@@ -43,7 +63,7 @@ services:
       - network_public
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "traefik_letsencrypt:/letsencrypt"
+      - "traefik_letsencrypt:/etc/traefik/letsencrypt"
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
