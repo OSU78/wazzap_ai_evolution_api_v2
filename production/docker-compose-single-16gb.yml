@@ -43,7 +43,7 @@ services:
       - network_public
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "traefik_letsencrypt:/etc/traefik/letsencrypt"
+      - "traefik_letsencrypt:/letsencrypt"
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
@@ -53,9 +53,6 @@ services:
       - "traefik.http.routers.http-catchall.middlewares=redirect-https@docker"
       - "traefik.http.routers.http-catchall.priority=1"
       - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.traefik.entrypoints=websecure"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.traefik.service=api@internal"
     
     deploy:
       placement:
@@ -185,12 +182,12 @@ services:
       - "traefik.http.services.evolution.loadbalancer.sticky.cookie.name=evolution_session"
     networks:
       - network_public
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     deploy:
       replicas: 3  # 3 instances sur 1 serveur = ~120 comptes WhatsApp
       resources:
@@ -202,8 +199,8 @@ services:
           cpus: '1.0'   # 1.0 CPU réservé
       restart_policy:
         condition: on-failure
-        delay: 10s
-        max_attempts: 5
+        delay: 5s
+        max_attempts: 3
       update_config:
         parallelism: 2  # Mettre à jour 2 instances à la fois
         delay: 30s
@@ -217,7 +214,6 @@ networks:
 
 volumes:
   evolution_instances:
-    external: true
-    name: evolution_v2_data
+    driver: local
   traefik_letsencrypt:
-    external: false
+    driver: local
