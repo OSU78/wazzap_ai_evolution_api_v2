@@ -134,14 +134,7 @@ services:
         max_attempts: 3
         window: 120s
       
-      # Limites de ressources
-      resources:
-        limits:
-          memory: 2G
-          cpus: '1.0'
-        reservations:
-          memory: 1G
-          cpus: '0.5'
+      
       
       # LABELS TRAEFIK - UNIQUEMENT ICI pour Swarm mode!
       labels:
