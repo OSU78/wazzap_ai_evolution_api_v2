@@ -53,8 +53,7 @@ services:
       - "traefik.http.routers.http-catchall.middlewares=redirect-https@docker"
       - "traefik.http.routers.http-catchall.priority=1"
       - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
-    networks:
-      - evolution_network
+    
     deploy:
       placement:
         constraints:
@@ -182,7 +181,7 @@ services:
       - "traefik.http.services.evolution.loadbalancer.sticky.cookie=true"
       - "traefik.http.services.evolution.loadbalancer.sticky.cookie.name=evolution_session"
     networks:
-      - evolution_network
+      - network_public
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
       interval: 30s
@@ -209,7 +208,7 @@ services:
         monitor: 60s
 
 networks:
-  evolution_network:
+  network_public:
     driver: bridge
 
 volumes:
