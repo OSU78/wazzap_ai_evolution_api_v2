@@ -106,7 +106,7 @@ services:
         - traefik.enable=true
         - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`)
         - traefik.http.routers.evolution_v2.entrypoints=websecure
-        - traefik.http.routers.evolution_v2.tls.certresolver=letsencrypt
+        - traefik.http.routers.evolution_v2.tls=true
         - traefik.http.routers.evolution_v2.service=evolution_v2
         - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
         - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
