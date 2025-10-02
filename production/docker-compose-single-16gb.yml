@@ -3,7 +3,6 @@ version: "3.9"
 services:
   evolution-api:
     image: evoapicloud/evolution-api:v2.3.0
-    restart: always
     env_file:
       - .env
     environment:
@@ -90,32 +89,39 @@ services:
 
     volumes:
       - evolution_instances:/evolution/instances
-      - ./.env:/evolution/.env:ro
+      # (évite les binds relatifs en Swarm)
+      # - ./.env:/evolution/.env:ro
 
     networks:
       - dokploy-network
 
-    # 🔑 Labels Traefik (compose classique => labels ici, pas dans deploy:)
-    labels:
-      - traefik.enable=true
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          # adapte si nécessaire (hostname réel) :
+          - node.role == manager
+      labels:
+        # ===== App sous /manager (StripPrefix) =====
+        - traefik.enable=true
+        - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`) && PathPrefix(`/manager`)
+        - traefik.http.routers.evolution_v2.entrypoints=websecure
+        # le resolver DOIT matcher ta conf statique: "letsencrypt"
+        - traefik.http.routers.evolution_v2.tls.certresolver=letsencrypt
+        - traefik.http.routers.evolution_v2.service=evolution_v2
+        - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
+        - traefik.http.middlewares.evo-strip.stripprefix.prefixes=/manager
+        - traefik.http.routers.evolution_v2.middlewares=evo-strip@swarm
 
-      # Router de l'app sous /manager (avec StripPrefix)
-      - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`) && PathPrefix(`/manager`)
-      - traefik.http.routers.evolution_v2.entrypoints=websecure
-      - traefik.http.routers.evolution_v2.tls.certresolver=letsencryptresolver
-      - traefik.http.routers.evolution_v2.service=evolution_v2
-      - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
-      - traefik.http.middlewares.evo-strip.stripprefix.prefixes=/manager
-      - traefik.http.routers.evolution_v2.middlewares=evo-strip@docker
-
-      # Dashboard Traefik (protège-le en prod avec basic auth)
-      - traefik.http.routers.traefik.rule=Host(`${DASHBOARD_HOST}`)
-      - traefik.http.routers.traefik.entrypoints=websecure
-      - traefik.http.routers.traefik.tls.certresolver=letsencryptresolver
-      - traefik.http.routers.traefik.service=api@internal
-      # Exemple basic-auth (remplace par ton hash htpasswd) :
-      # - traefik.http.routers.traefik.middlewares=traefik-auth@docker
-      # - traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$....hash....
+        # ===== (Optionnel) Dashboard Traefik protégé =====
+        # Mets DASHBOARD_HOST=traefik.evolution.wazzap.fr dans ton .env
+        - traefik.http.routers.traefik.rule=Host(`${DASHBOARD_HOST}`)
+        - traefik.http.routers.traefik.entrypoints=websecure
+        - traefik.http.routers.traefik.tls.certresolver=letsencrypt
+        - traefik.http.routers.traefik.service=api@internal
+        # Active une basic-auth (remplace le hash par le tien)
+        # - traefik.http.routers.traefik.middlewares=traefik-auth@swarm
+        # - traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$....hash....
 
 networks:
   dokploy-network:
