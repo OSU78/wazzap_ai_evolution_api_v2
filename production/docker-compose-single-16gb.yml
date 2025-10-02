@@ -112,21 +112,6 @@ services:
         # constraints:
         #   - node.labels.type == evolution-worker
       
-      # Configuration de mise à jour (rolling update)
-      update_config:
-        parallelism: 1      # Mettre à jour 1 instance à la fois
-        delay: 10s          # Attendre 10s entre chaque instance
-        failure_action: rollback
-        monitor: 30s
-        order: start-first  # Démarrer la nouvelle avant de stopper l'ancienne
-      
-      # Configuration de rollback
-      rollback_config:
-        parallelism: 1
-        delay: 10s
-        monitor: 30s
-        order: stop-first
-      
       # Politique de redémarrage
       restart_policy:
         condition: on-failure
