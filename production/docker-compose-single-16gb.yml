@@ -96,7 +96,7 @@ services:
       - dokploy-network
 
     deploy:
-      replicas: 1
+      replicas: 2
       placement:
         constraints:
           # adapte si nécessaire (hostname réel) :
