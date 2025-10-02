@@ -168,14 +168,14 @@ services:
       retries: 3
       start_period: 40s
     deploy:
-      replicas: 10  # 10 instances sur 1 serveur = ~400 comptes WhatsApp
+      replicas: 3  # 3 instances sur 1 serveur = ~120 comptes WhatsApp
       resources:
         limits:
-          memory: 1.4G  # 1.4GB par instance (plus conservateur sur 1 serveur)
-          cpus: '0.6'   # 0.6 CPU par instance
+          memory: 4G    # 4GB par instance (optimisé pour 3 instances sur 16GB)
+          cpus: '2.0'   # 2.0 CPU par instance
         reservations:
-          memory: 700M  # 700MB réservé
-          cpus: '0.3'   # 0.3 CPU réservé
+          memory: 2G    # 2GB réservé par instance
+          cpus: '1.0'   # 1.0 CPU réservé
       restart_policy:
         condition: on-failure
         delay: 5s
