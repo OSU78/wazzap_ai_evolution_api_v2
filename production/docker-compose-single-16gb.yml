@@ -57,6 +57,7 @@ services:
       - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
       - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencryptresolver"
       - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
     
     deploy:
       placement:
@@ -178,12 +179,12 @@ services:
       - ./.env:/evolution/.env:ro  # Monter votre .env par-dessus celui du conteneur
     labels:
       - traefik.enable=true
-      - traefik.http.routers.evolution.rule=Host(`${DOMAIN_NAME}`)
-      - traefik.http.routers.evolution.entrypoints=websecure
-      - traefik.http.routers.evolution.tls.certresolver=letsencryptresolver
-      - traefik.http.routers.evolution.service=evolution
-      - traefik.http.services.evolution.loadbalancer.server.port=8080
-      - traefik.http.services.evolution.loadbalancer.passHostHeader=true
+      - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`)
+      - traefik.http.routers.evolution_v2.entrypoints=websecure
+      - traefik.http.routers.evolution_v2.tls.certresolver=letsencryptresolver
+      - traefik.http.routers.evolution_v2.service=evolution_v2
+      - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
+      - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
 
     networks:
       - network_public
