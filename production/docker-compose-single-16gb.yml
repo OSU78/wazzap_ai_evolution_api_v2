@@ -95,9 +95,7 @@ services:
 
     deploy:
       replicas: 2
-      placement:
-        preferences:
-          - spread: node.id
+      
       labels:
         # ===== Evolution API - Configuration recommandée =====
         - traefik.enable=true
