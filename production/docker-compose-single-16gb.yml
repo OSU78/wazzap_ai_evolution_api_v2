@@ -11,7 +11,7 @@ services:
     restart: always
     command:
       - "--api.dashboard=true"
-      - "--api.insecure=true"  # Dashboard accessible sans auth
+      #- "--api.insecure=true"  # Dashboard accessible sans auth
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
