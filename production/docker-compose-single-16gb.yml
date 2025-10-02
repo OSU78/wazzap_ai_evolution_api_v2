@@ -96,9 +96,9 @@ services:
 
     ports:
       - target: 8080
-        published: 8080
+        published: 8081
         protocol: tcp
-        mode: host  # Expose sur l'IP publique de chaque node
+        mode: host  # Expose sur l'IP publique de chaque node (port 8081 au lieu de 8080)
 
     deploy:
       mode: replicated
