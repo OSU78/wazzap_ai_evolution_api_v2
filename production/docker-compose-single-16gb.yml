@@ -104,17 +104,10 @@ services:
         - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`) && PathPrefix(`/manager`)
         - traefik.http.routers.evolution_v2.entrypoints=websecure
         - traefik.http.routers.evolution_v2.tls.certresolver=letsencrypt
+        - traefik.http.routers.evolution_v2.service=evolution_v2
         - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
         - traefik.http.middlewares.evo-strip.stripprefix.prefixes=/manager
         - traefik.http.routers.evolution_v2.middlewares=evo-strip@swarm
-
-        # ===== Traefik Dashboard =====
-        - traefik.http.routers.traefik.rule=Host(`${DASHBOARD_HOST}`) && PathPrefix(`/dashboard`)
-        - traefik.http.routers.traefik.entrypoints=websecure
-        - traefik.http.routers.traefik.tls.certresolver=letsencrypt
-        - traefik.http.middlewares.traefik-strip.stripprefix.prefixes=/dashboard
-        - traefik.http.routers.traefik.middlewares=traefik-strip@swarm
-        - traefik.http.routers.traefik.service=api@internal
 
 networks:
   dokploy-network:
