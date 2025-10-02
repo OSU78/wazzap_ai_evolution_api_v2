@@ -48,6 +48,12 @@ services:
     networks:
       - evolution_network
     deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
       resources:
         limits:
           memory: 512M
