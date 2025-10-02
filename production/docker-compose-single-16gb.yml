@@ -171,7 +171,7 @@ services:
         # - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie.name=evolution_session
         
         # Réseau Traefik (important pour Dokploy)
-        - traefik.docker.network=dokploy-network
+        
 
 networks:
   dokploy-network:
