@@ -4,8 +4,6 @@ services:
   # Evolution API - Instance principale
   evolution-api:
     image: evoapicloud/evolution-api:v2.3.0
-    env_file:
-      - .env
     environment:
       SERVER_TYPE: http
       SERVER_PORT: 8080
