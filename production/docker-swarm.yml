@@ -120,7 +120,7 @@ services:
       CLEAN_STORE_MESSAGES: true
       CLEAN_STORE_MESSAGE_UP_TO: false
       CLEAN_STORE_CONTACTS: true
-      CLEAN_STORE_CHATS: true
+      CLEAN_STORE_CHATS: false
       
       # Configuration WebHook
       WEBHOOK_GLOBAL_URL: ""

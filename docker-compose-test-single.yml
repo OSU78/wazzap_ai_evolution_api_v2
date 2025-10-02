@@ -43,7 +43,7 @@ services:
       CLEAN_STORE_CLEANING_INTERVAL: 7200
       CLEAN_STORE_MESSAGES: true
       CLEAN_STORE_CONTACTS: true
-      CLEAN_STORE_CHATS: true
+      CLEAN_STORE_CHATS: false
       
       # Configuration WebHook
       WEBHOOK_GLOBAL_URL: ${WEBHOOK_GLOBAL_URL}

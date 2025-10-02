@@ -40,7 +40,7 @@ services:
       CLEAN_STORE_MESSAGES: true
       CLEAN_STORE_MESSAGE_UP_TO: false
       CLEAN_STORE_CONTACTS: true
-      CLEAN_STORE_CHATS: true
+      CLEAN_STORE_CHATS: false
       
       # Configuration WebHook - Wazzap Integration (Déjà configurée)
       WEBHOOK_GLOBAL_URL: https://wazzap.ngrok.app/api/webhook/v2/messageHandlers
@@ -69,7 +69,7 @@ services:
       STORE_MESSAGES: true
       STORE_MESSAGE_UP: false
       STORE_CONTACTS: true
-      STORE_CHATS: true
+      STORE_CHATS: false
       
     volumes:
       - evolution_instances:/evolution/instances
