@@ -98,9 +98,7 @@ services:
     deploy:
       replicas: 2
       placement:
-        constraints:
-          # adapte si nécessaire (hostname réel) :
-          - node.role == manager
+        
       labels:
         # ===== App sous /manager (StripPrefix) =====
         - traefik.enable=true
