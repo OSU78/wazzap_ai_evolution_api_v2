@@ -209,7 +209,8 @@ services:
 
 networks:
   network_public:
-    driver: bridge
+    external: true
+    name: network_public
 
 volumes:
   evolution_instances:
