@@ -111,9 +111,8 @@ services:
         - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
         # Configuration pour éviter les 502 dus aux timeouts keepalive
         - traefik.http.services.evolution_v2.loadbalancer.responseForwarding.flushInterval=100ms
-        # Sticky sessions pour maintenir l'utilisateur sur la même réplique
-        # - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie=true
-        # - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie.name=evolution_lb
+        # Forcer Traefik à découvrir chaque task individuellement
+        - traefik.docker.network=dokploy-network
 
 networks:
   dokploy-network:
