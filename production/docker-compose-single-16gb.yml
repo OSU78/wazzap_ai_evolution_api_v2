@@ -99,20 +99,14 @@ services:
         preferences:
           - spread: node.id
       labels:
-        # ===== Evolution API - Configuration Dokploy =====
+        # ===== Evolution API - Configuration recommandée =====
         - traefik.enable=true
         - traefik.http.routers.evolution_v2.rule=Host(`${DOMAIN_NAME}`)
         - traefik.http.routers.evolution_v2.entrypoints=websecure
         - traefik.http.routers.evolution_v2.tls.certresolver=letsencrypt
         - traefik.http.routers.evolution_v2.service=evolution_v2
         - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
-        # Health check pour le load balancer
-        - traefik.http.services.evolution_v2.loadbalancer.healthcheck.path=/
-        - traefik.http.services.evolution_v2.loadbalancer.healthcheck.interval=10s
-        - traefik.http.services.evolution_v2.loadbalancer.healthcheck.timeout=5s
-        # Sticky sessions pour éviter les problèmes de session
-        - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie=true
-        - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie.name=evolution_lb
+        - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
 
 networks:
   dokploy-network:
