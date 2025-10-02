@@ -109,10 +109,11 @@ services:
         - traefik.http.routers.evolution_v2.service=evolution_v2
         - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
         - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
-        # Sticky sessions pour éviter les problèmes de session entre répliques
+        # Configuration pour éviter les 502 dus aux timeouts keepalive
+        - traefik.http.services.evolution_v2.loadbalancer.responseForwarding.flushInterval=100ms
+        # Sticky sessions pour maintenir l'utilisateur sur la même réplique
         # - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie=true
         # - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie.name=evolution_lb
-        # - traefik.http.services.evolution_v2.loadbalancer.sticky.cookie.httpOnly=true
 
 networks:
   dokploy-network:
