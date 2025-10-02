@@ -106,7 +106,6 @@ services:
         - traefik.http.routers.evolution_v2.tls.certresolver=letsencrypt
         - traefik.http.routers.evolution_v2.service=evolution_v2
         - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
-        - traefik.http.middlewares.evo-strip.stripprefix.prefixes=/manager
         - traefik.http.routers.evolution_v2.middlewares=evo-strip@swarm
 
 networks:
