@@ -92,7 +92,7 @@ services:
       - evolution_instances:/evolution/instances
 
     networks:
-      - dokploy-network
+      - network_public
 
     deploy:
       mode: replicated
@@ -112,16 +112,16 @@ services:
         # Configuration pour éviter les 502 dus aux timeouts keepalive
         - traefik.http.services.evolution_v2.loadbalancer.responseForwarding.flushInterval=100ms
         # CRITIQUE: Forcer Traefik à utiliser le bon réseau en mode Swarm
-        - traefik.docker.network=dokploy-network
+        - traefik.docker.network=network_public
         # Health check pour détecter les replicas défaillants
         - traefik.http.services.evolution_v2.loadbalancer.healthcheck.path=/
         - traefik.http.services.evolution_v2.loadbalancer.healthcheck.interval=10s
         - traefik.http.services.evolution_v2.loadbalancer.healthcheck.timeout=5s
 
 networks:
-  dokploy-network:
+  network_public:
     external: true
-    name: dokploy-network
+    name: network_public
 
 volumes:
   evolution_instances:
