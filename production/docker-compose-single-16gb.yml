@@ -41,10 +41,13 @@ services:
       - "traefik_letsencrypt:/letsencrypt"
     labels:
       - "traefik.enable=true"
+      - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-https.redirectscheme.permanent=true"
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-https@docker"
+      - "traefik.http.routers.http-catchall.priority=1"
       - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.traefik.entrypoints=websecure"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.traefik.service=api@internal"
     networks:
       - evolution_network
     deploy:
