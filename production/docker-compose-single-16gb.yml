@@ -182,9 +182,7 @@ services:
       - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
 
     networks:
-      network_public:
-        external: true
-        name: network_public
+      - network_public
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
       interval: 30s
