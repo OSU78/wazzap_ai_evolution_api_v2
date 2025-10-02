@@ -98,6 +98,8 @@ services:
     deploy:
       replicas: 2
       placement:
+        preferences:
+          - spread: node.id
         
       labels:
         # ===== App sous /manager (StripPrefix) =====
