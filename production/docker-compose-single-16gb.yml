@@ -100,7 +100,7 @@ services:
       placement:
         preferences:
           #mettre le worker1 en preference
-          - node.id == worker1
+          - node.hostname == worker1
           #- spread: node.id
       labels:
         # ===== Evolution API - Configuration Traefik =====
