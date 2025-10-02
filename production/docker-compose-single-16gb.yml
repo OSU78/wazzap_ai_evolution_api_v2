@@ -214,7 +214,7 @@ networks:
 volumes:
   evolution_instances:
     external: true
-    name: network_public
+    name: evolution_v2_data
   traefik_letsencrypt:
     external: false
   
