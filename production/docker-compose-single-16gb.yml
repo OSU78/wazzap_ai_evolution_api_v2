@@ -94,13 +94,19 @@ services:
     networks:
       - dokploy-network
 
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host  # Expose sur l'IP publique de chaque node
+
     deploy:
       mode: replicated
       replicas: 2
       placement:
-        constraints:
-          # Forcer les replicas uniquement sur worker1
-          - node.hostname == worker1
+        preferences:
+          # OBLIGATOIRE avec mode host: 1 replica par node (sinon conflit de port)
+          - spread: node.id
       # NOTE: Dokploy ajoute automatiquement les labels Traefik
       # Pas besoin de les définir manuellement ici
       # Dokploy gère: routing, SSL, load balancing, health checks
