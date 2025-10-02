@@ -109,11 +109,6 @@ services:
         - traefik.http.routers.evolution_v2.service=evolution_v2
         - traefik.http.services.evolution_v2.loadbalancer.server.port=8080
         - traefik.http.services.evolution_v2.loadbalancer.passHostHeader=true
-        # Configuration load balancing
-        - traefik.docker.network=dokploy-network
-        - traefik.http.services.evolution_v2.loadbalancer.healthcheck.path=/
-        - traefik.http.services.evolution_v2.loadbalancer.healthcheck.interval=10s
-        - traefik.http.services.evolution_v2.loadbalancer.healthcheck.timeout=3s
 
 networks:
   dokploy-network:
