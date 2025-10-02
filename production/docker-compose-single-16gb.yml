@@ -10,23 +10,23 @@ services:
       SERVER_PORT: 8080
       SERVER_URL: https://${DOMAIN_NAME}
 
-      DATABASE_ENABLED: true
+      DATABASE_ENABLED: "true"
       DATABASE_PROVIDER: postgresql
       DATABASE_CONNECTION_URI: ${DATABASE_CONNECTION_URI}
       DATABASE_CONNECTION_CLIENT_NAME: evolution_single_16gb
-      DATABASE_SAVE_DATA_INSTANCE: true
-      DATABASE_SAVE_DATA_NEW_MESSAGE: false
-      DATABASE_SAVE_MESSAGE_UPDATE: true
-      DATABASE_SAVE_DATA_CONTACTS: true
-      DATABASE_SAVE_DATA_CHATS: false
-      DATABASE_SAVE_DATA_LABELS: true
-      DATABASE_SAVE_DATA_HISTORIC: true
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+      DATABASE_SAVE_DATA_NEW_MESSAGE: "false"
+      DATABASE_SAVE_MESSAGE_UPDATE: "true"
+      DATABASE_SAVE_DATA_CONTACTS: "true"
+      DATABASE_SAVE_DATA_CHATS: "false"
+      DATABASE_SAVE_DATA_LABELS: "true"
+      DATABASE_SAVE_DATA_HISTORIC: "true"
 
-      CACHE_REDIS_ENABLED: true
+      CACHE_REDIS_ENABLED: "true"
       CACHE_REDIS_URI: ${CACHE_REDIS_URI}
       CACHE_REDIS_PREFIX_KEY: evolution_single
-      CACHE_REDIS_SAVE_INSTANCES: true
-      CACHE_LOCAL_ENABLED: false
+      CACHE_REDIS_SAVE_INSTANCES: "true"
+      CACHE_LOCAL_ENABLED: "false"
 
       AUTHENTICATION_API_KEY: ${AUTHENTICATION_API_KEY}
       AUTHENTICATION_JWT_EXPIRES_IN: 0
@@ -34,10 +34,10 @@ services:
 
       DEL_INSTANCE: 8
       CLEAN_STORE_CLEANING_INTERVAL: 7200
-      CLEAN_STORE_MESSAGES: true
-      CLEAN_STORE_MESSAGE_UP_TO: false
-      CLEAN_STORE_CONTACTS: true
-      CLEAN_STORE_CHATS: false
+      CLEAN_STORE_MESSAGES: "true"
+      CLEAN_STORE_MESSAGE_UP_TO: "false"
+      CLEAN_STORE_CONTACTS: "true"
+      CLEAN_STORE_CHATS: "false"
 
       WEBHOOK_GLOBAL_URL: ${WEBHOOK_GLOBAL_URL:-https://wazzap.ngrok.app/api/webhook/v2/messageHandlers}
       WEBHOOK_GLOBAL_ENABLED: ${WEBHOOK_GLOBAL_ENABLED:-true}
@@ -74,18 +74,18 @@ services:
       WEBHOOK_EVENTS_ERRORS_WEBHOOK: ${WEBHOOK_EVENTS_ERRORS_WEBHOOK:-false}
 
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      LOG_COLOR: false
+      LOG_COLOR: "false"
       LOG_BAILEYS: error
 
       CORS_ORIGIN: "*"
       CORS_METHODS: "POST,GET,PUT,DELETE"
-      CORS_CREDENTIALS: true
+      CORS_CREDENTIALS: "true"
 
-      S3_ENABLED: false
-
-      STORE_MESSAGES: true
-      STORE_CONTACTS: true
-      STORE_CHATS: false
+      S3_ENABLED: "false"
+ 
+      STORE_MESSAGES: "true"
+      STORE_CONTACTS: "true"
+      STORE_CHATS: "false"
 
     volumes:
       - evolution_instances:/evolution/instances
