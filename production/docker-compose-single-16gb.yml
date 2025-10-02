@@ -52,7 +52,11 @@ services:
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-https@docker"
       - "traefik.http.routers.http-catchall.priority=1"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
+      # Configuration du dashboard Traefik
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
     
     deploy:
       placement:
