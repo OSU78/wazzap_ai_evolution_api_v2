@@ -164,3 +164,6 @@ volumes:
   evolution_instances:
     external: true
     name: evolution_v2_data
+  traefik_letsencrypt:
+    external: false
+
