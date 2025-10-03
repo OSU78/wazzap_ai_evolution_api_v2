@@ -116,6 +116,7 @@ services:
         - traefik.http.routers.evolution.tls=true
         - traefik.http.routers.evolution.service=evolution-svc
         - traefik.http.services.evolution-svc.loadbalancer.server.port=8080
+        - traefik.http.routers.evolution.tls.certresolver=letsencryptresolver
         - traefik.http.services.evolution-svc.loadbalancer.passHostHeader=true
         - traefik.docker.network=dokploy-network
 
