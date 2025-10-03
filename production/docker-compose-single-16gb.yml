@@ -94,23 +94,29 @@ services:
     networks:
       - dokploy-network
 
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host  # Expose sur l'IP publique de chaque node (port 8080 au lieu de 8080)
+
     deploy:
       mode: replicated
       replicas: 2
       placement:
         preferences:
-          # Répartir les replicas : 1 sur manager + 1 sur worker1
+          # OBLIGATOIRE avec mode host: 1 replica par node (sinon conflit de port)
           - spread: node.id
       
       labels:
-        # Labels Traefik - Nom unique pour éviter les conflits avec Dokploy
+        # Labels Traefik pour router vers le port 8080 (port interne du container)
         - traefik.enable=true
-        - traefik.http.routers.evolution-v3.rule=Host(`evolution.wazzap.fr`)
-        - traefik.http.routers.evolution-v3.entrypoints=websecure
-        - traefik.http.routers.evolution-v3.tls=true
-        - traefik.http.routers.evolution-v3.service=evolution-v3-svc
-        - traefik.http.services.evolution-v3-svc.loadbalancer.server.port=8080
-        - traefik.http.services.evolution-v3-svc.loadbalancer.passHostHeader=true
+        - traefik.http.routers.evolution.rule=Host(`evolution.wazzap.fr`)
+        - traefik.http.routers.evolution.entrypoints=websecure
+        - traefik.http.routers.evolution.tls=true
+        - traefik.http.routers.evolution.service=evolution-svc
+        - traefik.http.services.evolution-svc.loadbalancer.server.port=8080
+        - traefik.http.services.evolution-svc.loadbalancer.passHostHeader=true
         - traefik.docker.network=dokploy-network
 
 networks:
