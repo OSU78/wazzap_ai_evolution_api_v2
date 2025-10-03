@@ -111,10 +111,13 @@ services:
       labels:
         # Labels Traefik pour router vers le port 8080 (port interne du container)
         - traefik.enable=true
-        - traefik.http.routers.evolution.rule=Host(`${DOMAIN_NAME}`)
+        - traefik.http.routers.evolution.rule=Host(`evolution.wazzap.fr`)
         - traefik.http.routers.evolution.entrypoints=websecure
-        - traefik.http.routers.evolution.tls.certresolver=letsencryptresolver
-        - traefik.http.services.evolution.loadbalancer.server.port=8080
+        - traefik.http.routers.evolution.tls=true
+        - traefik.http.routers.evolution.service=evolution-svc
+        - traefik.http.services.evolution-svc.loadbalancer.server.port=8080
+        - traefik.http.services.evolution-svc.loadbalancer.passHostHeader=true
+        - traefik.docker.network=dokploy-network
 
 networks:
   dokploy-network:
