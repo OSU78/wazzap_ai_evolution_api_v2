@@ -103,21 +103,21 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-      placement:
-        preferences:
-          # OBLIGATOIRE avec mode host: 1 replica par node (sinon conflit de port)
-          - spread: node.id
+      # placement:
+      #   preferences:
+      #     # OBLIGATOIRE avec mode host: 1 replica par node (sinon conflit de port)
+      #     - spread: node.id
       
-      labels:
-        # Labels Traefik - Nom unique pour éviter conflits avec routers Dokploy
-        - traefik.enable=true
-        - traefik.http.routers.evo-custom.rule=Host(`evolution.wazzap.fr`)
-        - traefik.http.routers.evo-custom.entrypoints=websecure
-        - traefik.http.routers.evo-custom.tls=true
-        - traefik.http.routers.evo-custom.service=evo-custom-svc
-        - traefik.http.services.evo-custom-svc.loadbalancer.server.port=8080
-        - traefik.http.services.evo-custom-svc.loadbalancer.passHostHeader=true
-        - traefik.docker.network=dokploy-network
+      # labels:
+      #   # Labels Traefik - Nom unique pour éviter conflits avec routers Dokploy
+      #   - traefik.enable=true
+      #   - traefik.http.routers.evo-custom.rule=Host(`evolution.wazzap.fr`)
+      #   - traefik.http.routers.evo-custom.entrypoints=websecure
+      #   - traefik.http.routers.evo-custom.tls=true
+      #   - traefik.http.routers.evo-custom.service=evo-custom-svc
+      #   - traefik.http.services.evo-custom-svc.loadbalancer.server.port=8080
+      #   - traefik.http.services.evo-custom-svc.loadbalancer.passHostHeader=true
+      #   - traefik.docker.network=dokploy-network
 
 networks:
   dokploy-network:
