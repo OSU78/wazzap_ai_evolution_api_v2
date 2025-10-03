@@ -9,7 +9,7 @@ services:
     environment:
       SERVER_TYPE: http
       SERVER_PORT: 8080
-      SERVER_URL: https://${DOMAIN_NAME}
+      SERVER_URL: https://evolution.wazzap.fr
 
       DATABASE_ENABLED: "true"
       DATABASE_PROVIDER: postgresql
