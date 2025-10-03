@@ -1,45 +1,6 @@
 version: "3.9"
 
-
 services:
-
-  # Traefik - Load Balancer et SSL
-  traefik:
-    image: traefik:2.11.2
-    container_name: traefik
-    restart: always
-    command:
-      - "--api.dashboard=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencryptresolver.acme.email=${LETSENCRYPT_EMAIL}"
-      - "--certificatesresolvers.letsencryptresolver.acme.storage=/letsencrypt/acme.json"
-      - "--log.level=INFO"
-    ports:
-      - "80:80"
-      - "443:443"
-      - "8081:8081"  # Dashboard Traefik
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "traefik_letsencrypt:/letsencrypt"
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)
-      - traefik.http.routers.traefik.entrypoints=websecure
-      - traefik.http.routers.traefik.tls.certresolver=letsencryptresolver
-      - traefik.http.routers.traefik.service=api@internal
-    networks:
-      - dokploy-network
-
-
-
-
   # Evolution API - Instance principale
   evolution-api:
     image: evoapicloud/evolution-api:v2.3.0
@@ -148,12 +109,15 @@ services:
           - spread: node.id
       
       labels:
-        # Labels Traefik pour router vers le port 8080 (port interne du container)
+        # Labels Traefik - Nom unique pour éviter conflits avec routers Dokploy
         - traefik.enable=true
-        - traefik.http.routers.evolution.rule=Host(`${DOMAIN_NAME}`)
-        - traefik.http.routers.evolution.entrypoints=websecure
-        - traefik.http.routers.evolution.tls.certresolver=letsencryptresolver
-        - traefik.http.services.evolution.loadbalancer.server.port=8080
+        - traefik.http.routers.evo-custom.rule=Host(`evolution.wazzap.fr`)
+        - traefik.http.routers.evo-custom.entrypoints=websecure
+        - traefik.http.routers.evo-custom.tls=true
+        - traefik.http.routers.evo-custom.service=evo-custom-svc
+        - traefik.http.services.evo-custom-svc.loadbalancer.server.port=8080
+        - traefik.http.services.evo-custom-svc.loadbalancer.passHostHeader=true
+        - traefik.docker.network=dokploy-network
 
 networks:
   dokploy-network:
@@ -164,6 +128,4 @@ volumes:
   evolution_instances:
     external: true
     name: evolution_v2_data
-  traefik_letsencrypt:
-    external: false
 
