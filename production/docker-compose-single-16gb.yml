@@ -107,9 +107,17 @@ services:
         preferences:
           # OBLIGATOIRE avec mode host: 1 replica par node (sinon conflit de port)
           - spread: node.id
-      # NOTE: Dokploy ajoute automatiquement les labels Traefik
-      # Pas besoin de les définir manuellement ici
-      # Dokploy gère: routing, SSL, load balancing, health checks
+      
+      labels:
+        # Labels Traefik pour router vers le port 8081
+        - traefik.enable=true
+        - traefik.http.routers.evolution-api.rule=Host(`evolution.wazzap.fr`)
+        - traefik.http.routers.evolution-api.entrypoints=websecure
+        - traefik.http.routers.evolution-api.tls=true
+        - traefik.http.routers.evolution-api.service=evolution-api-svc
+        - traefik.http.services.evolution-api-svc.loadbalancer.server.port=8081
+        - traefik.http.services.evolution-api-svc.loadbalancer.passHostHeader=true
+        - traefik.docker.network=dokploy-network
 
 networks:
   dokploy-network:
