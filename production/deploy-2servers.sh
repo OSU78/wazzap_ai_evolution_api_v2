@@ -53,7 +53,7 @@ log_info "Test des services externes..."
 
 # Test Neon PostgreSQL
 log_info "Test Neon PostgreSQL..."
-if timeout 10 docker run --rm postgres:15-alpine psql "postgresql://neondb_owner:npg_cyOdLoBN0Z5T@ep-soft-pine-adcz7qon-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&connection_limit=15&pool_timeout=20&connect_timeout=15" -c "SELECT 1;" >/dev/null 2>&1; then
+if timeout 10 docker run --rm postgres:15-alpine psql "postgresql://neondb_owner:npg_cyOdLoBN0Z5T@ep-soft-pine-adcz7qon-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require" -c "SELECT 1;" >/dev/null 2>&1; then
     log_success "Neon PostgreSQL accessible"
 else
     log_error "Neon PostgreSQL inaccessible !"

@@ -12,7 +12,7 @@ services:
       # Base de données Neon (Externe) - Déjà configurée
       DATABASE_ENABLED: true
       DATABASE_PROVIDER: postgresql
-      DATABASE_CONNECTION_URI: postgresql://neondb_owner:npg_cyOdLoBN0Z5T@ep-soft-pine-adcz7qon-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&connection_limit=15&pool_timeout=20&connect_timeout=15
+      DATABASE_CONNECTION_URI: postgresql://neondb_owner:npg_cyOdLoBN0Z5T@ep-soft-pine-adcz7qon-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       DATABASE_CONNECTION_CLIENT_NAME: evolution_7k_cluster
       DATABASE_SAVE_DATA_INSTANCE: true
       DATABASE_SAVE_DATA_NEW_MESSAGE: false
