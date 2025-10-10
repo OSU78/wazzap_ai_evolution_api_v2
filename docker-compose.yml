@@ -7,7 +7,7 @@ services:
   # API Evolution - Instance principale (utilise des services externes)
   evolution-api:
     container_name: evolution_api
-    image: evoapicloud/evolution-api:v2.3.0
+    image: atendai/evolution-api:latest
     restart: always
     ports:
       - "8081:8080"
