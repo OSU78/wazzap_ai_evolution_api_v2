@@ -3,7 +3,7 @@ version: "3.9"
 services:
   # Evolution API - Instance principale
   evolution-api:
-    image: evoapicloud/evolution-api:v2.3.0
+    image: atendai/evolution-api:latest
     env_file:
       - .env
     environment:
@@ -43,7 +43,7 @@ services:
       CLEAN_STORE_MESSAGES: "true"
       CLEAN_STORE_MESSAGE_UP_TO: "false"
       CLEAN_STORE_CONTACTS: "true"
-      CLEAN_STORE_CHATS: "false"
+      CLEAN_STORE_CHATS: "true"
 
       WEBHOOK_GLOBAL_URL: ${WEBHOOK_GLOBAL_URL:-https://wazzap.ngrok.app/api/webhook/v2/messageHandlers}
       WEBHOOK_GLOBAL_ENABLED: ${WEBHOOK_GLOBAL_ENABLED:-true}
@@ -89,9 +89,12 @@ services:
 
       S3_ENABLED: "false"
  
-      STORE_MESSAGES: "true"
-      STORE_CONTACTS: "true"
+      STORE_MESSAGES: "false"
+      STORE_CONTACTS: "false"
       STORE_CHATS: "false"
+
+      QRCODE_COLOR: "#166A27FF"
+      QRCODE_LIMIT: 50
 
     volumes:
       - evolution_instances:/evolution/instances
