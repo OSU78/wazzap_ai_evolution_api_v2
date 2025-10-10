@@ -90,9 +90,9 @@ services:
       DEL_INSTANCE: 8
       CLEAN_STORE_CLEANING_INTERVAL: 7200
       CLEAN_STORE_MESSAGES: true
-      CLEAN_STORE_MESSAGE_UP_TO: false
+      CLEAN_STORE_MESSAGE_UP_TO: true
       CLEAN_STORE_CONTACTS: true
-      CLEAN_STORE_CHATS: false
+      CLEAN_STORE_CHATS: true
       
       # Désactiver les services non utilisés
       RABBITMQ_ENABLED: false
@@ -108,12 +108,12 @@ services:
       
       # Configuration QR Code
       QRCODE_LIMIT: 50
-      QRCODE_COLOR: "#010101FF"
+      QRCODE_COLOR: "#166A27FF"
       
       # Configuration de performance
-      STORE_MESSAGES: true
+      STORE_MESSAGES: false
       STORE_MESSAGE_UP: false
-      STORE_CONTACTS: true
+      STORE_CONTACTS: false
       STORE_CHATS: false
       
     volumes:
