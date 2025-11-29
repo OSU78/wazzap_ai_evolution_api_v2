@@ -3,7 +3,7 @@ version: "3.9"
 services:
   # Evolution API - Instance principale
   evolution-api:
-    image: evoapicloud/evolution-api:v2.3.6
+    image: evoapicloud/evolution-api:v2.3.7
     env_file:
       - .env
     environment:

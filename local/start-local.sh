@@ -93,7 +93,10 @@ S3_ENABLED=false
 
 # Environnement
 NODE_ENV=development
-DEBUG=false
+DEBUG=true
+QRCODE_COLOR="#297325"
+
+
 EOF
 
 # Vérifier que le fichier .env a été créé

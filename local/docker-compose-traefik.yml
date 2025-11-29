@@ -55,7 +55,7 @@ services:
 
   # API Evolution - Instance principale avec Traefik
   evolution-api:
-    image: evoapicloud/evolution-api:v2.3.6
+    image: evoapicloud/evolution-api:v2.3.7
     container_name: evolution_api
     restart: always
     environment:
@@ -155,7 +155,7 @@ services:
       
       # Configuration QR Code
       QRCODE_LIMIT: 50
-      QRCODE_COLOR: "#010101FF"
+      QRCODE_COLOR: "#297325"
       
       # Configuration de performance
       STORE_MESSAGES: true
