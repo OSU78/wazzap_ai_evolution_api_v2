@@ -55,7 +55,7 @@ services:
 
   # API Evolution - Instance principale avec Traefik
   evolution-api:
-    image: evoapicloud/evolution-api:v2.3.0
+    image: evoapicloud/evolution-api:v2.3.6
     container_name: evolution_api
     restart: always
     environment:
@@ -64,7 +64,7 @@ services:
       SERVER_PORT: 8080
       SERVER_URL: ${SERVER_URL:-http://localhost:8080}
       CONFIG_SESSION_PHONE_VERSION: ${CONFIG_SESSION_PHONE_VERSION:-2.3000.1023204200}
-      CONFIG_SESSION_PHONE_NAME: ${CONFIG_SESSION_PHONE_NAME:-Chrome}
+      CONFIG_SESSION_PHONE_NAME: ${CONFIG_SESSION_PHONE_NAME:-Firefox}
       CONFIG_SESSION_PHONE_CLIENT: ${CONFIG_SESSION_PHONE_CLIENT:-Wazzap AI}
       
       # Forcer les variables importantes (priorité sur le .env du conteneur)
