@@ -55,7 +55,7 @@ services:
 
   # API Evolution - Instance principale avec Traefik
   evolution-api:
-    image: evoapicloud/evolution-api:v2.3.7
+    image: evoapicloud/evolution-api:v2.3.5
     container_name: evolution_api
     restart: always
     environment:
